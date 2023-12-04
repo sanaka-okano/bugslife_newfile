@@ -27,6 +27,15 @@ a.btn-link {
   height: 36px;
 }
 
+.btn-destroy{
+  color:#fff;
+  background-color: #DC3545;
+}
+.btn-destroy:hover{
+  background-color: 	#ED1C24;
+
+}
+
 /* PC */
 .app-show-container {
   width: 100%;
