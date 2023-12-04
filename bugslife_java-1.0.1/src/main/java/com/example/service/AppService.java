@@ -37,5 +37,4 @@ public class AppService {
 	public void delete(App entity) {
 		appRepository.delete(entity);
 	}
-
 }

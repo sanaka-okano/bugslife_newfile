@@ -33,7 +33,7 @@
     </div>
     <div class="form-group">
       <a class="btn btn-warning" th:href="@{/apps/{id}/edit(id = ${app.id})}">Edit this record</a>
-      <form class="d-inline" th:action="@{/apps/{id}(id = ${app.id})}" th:method="delete">
+      <form class="d-inline" th:action="@{/apps/delete/{id}(id = ${app.id})}" th:method="delete">
         <button class="btn btn-info" type="submit">Delete this record</button>
       </form>
     </div>
