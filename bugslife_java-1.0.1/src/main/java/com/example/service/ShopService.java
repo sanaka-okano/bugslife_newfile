@@ -23,10 +23,10 @@ public class ShopService {
 	}
 
 	public List<Shop> findAll(Shop probe) {
-		if (probe.getName() != null && !probe.getName().isBlank()) {
-			return shopRepository.findAll(Example.of(probe));
+		if (probe.getName() != null) {
+			return shopRepository.findByNameContaining(probe.getName());
 		} else {
-			return shopRepository.findAll();
+			return shopRepository.findAll(Example.of(probe));
 		}
 	}
 
