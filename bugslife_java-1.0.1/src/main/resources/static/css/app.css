@@ -29,6 +29,28 @@ a.btn-link {
   height: 36px;
 }
 
+/* edit */
+
+.form-control{
+  width: 90%;
+}
+.form-control-lg{
+  height: 25px;
+  min-height: auto;
+  padding: auto;
+  font-size: smaller;
+  border-radius: 2px;
+  box-sizing: content-box;
+  width: 90%;
+  display: block;
+  border: 1px solid #1B1B1B;
+  padding: 5px;
+}
+
+.form-group{
+  margin: 10px;
+}
+
 /* PC */
 .app-show-container {
   width: 100%;
