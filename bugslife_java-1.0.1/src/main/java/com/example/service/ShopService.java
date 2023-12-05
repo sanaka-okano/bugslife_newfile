@@ -23,7 +23,7 @@ public class ShopService {
 	}
 
 	public List<Shop> findAll(Shop probe) {
-		if (probe.getName() != null) {
+		if (probe.getName() != null && !probe.getName().isBlank()) {
 			return shopRepository.findByNameContaining(probe.getName());
 		} else {
 			return shopRepository.findAll(Example.of(probe));

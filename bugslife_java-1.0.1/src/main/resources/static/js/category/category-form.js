@@ -12,6 +12,7 @@ $(document).ready(function () {
       let id = $(this).attr("id");
 
       // codeのバリデーション
+      
       if (id === "code") {
         let code = $(this).val();
         if (code === "" || !isPatternValid(code)) {
@@ -46,11 +47,13 @@ $(document).ready(function () {
         }
       }
     });
+    console.log(isValid);
     return isValid;
   }
+  
 
   function isPatternValid(code) {
-    let pattern = /^([A-Z]{3}[0-9]{3})$/;
+    let pattern = /^([A-Z]{3}-[0-9]{3})$/;
     return pattern.test(code);
   }
 });
