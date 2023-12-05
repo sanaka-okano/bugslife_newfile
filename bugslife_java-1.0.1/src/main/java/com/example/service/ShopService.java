@@ -34,10 +34,6 @@ public class ShopService {
 		return shopRepository.findById(id);
 	}
 
-	public List<Shop> searchShops(String keyword) {
-		return shopRepository.findByNameContaining(keyword);
-	}
-
 	@Transactional(readOnly = false)
 	public Shop save(Shop entity) {
 		return shopRepository.save(entity);
