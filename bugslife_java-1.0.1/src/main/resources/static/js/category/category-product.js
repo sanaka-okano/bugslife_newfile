@@ -3,7 +3,7 @@ $(document).ready(function () {
   let action = document.getElementById("action").getAttribute("val");
 
   $.ajax({
-    url: "/api/category/" + categoryId,
+    url: "/api/categories/" + categoryId,
     type: "GET",
     dataType: "json",
   })
