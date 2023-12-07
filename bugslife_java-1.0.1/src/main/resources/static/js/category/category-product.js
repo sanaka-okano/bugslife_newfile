@@ -1,22 +1,23 @@
 $(document).ready(function () {
   let categoryId = document.getElementById("categoryId").getAttribute("val");
   let action = document.getElementById("action").getAttribute("val");
-
   $.ajax({
-    url: "/api/categories/" + categoryId,
+    url: "/api/categories/" + categoryId ,
     type: "GET",
     dataType: "json",
   })
     .done(function (data) {
-      var categoryProducts = data;
+      var categoryProducts = [data.categoryProducts];
       // チェックボックスにチェックを入れる処理
-      categoryProducts.forEach(function (categoryProduct) {
-        $("#checkbox-" + categoryProduct.productId).prop("checked", true);
-      });
+      for (let i = 0; i < categoryProducts.length; i++) {
+        for (let j = 0; j < categoryProducts[i].length; j++) {
+          let productId = categoryProducts[i][j].productId;
+          $("#checkbox-" + categoryProducts[i][j].productId).prop("checked", true);
+        }}
     })
     .fail(function () {
       // APIコールが失敗した場合の処理
-      console.log("APIコールが失敗しました。");
+      alert("APIコールが失敗しました。");
     });
 
   $("#update-button").click(function () {
@@ -33,14 +34,14 @@ $(document).ready(function () {
       }
     }
 
-    let postData = {
+    let postData = JSON.stringify({
       productIds: checkedIds,
-    };
+    });
 
     $.ajax({
       url: "/api/categories/" + categoryId + "/updateCategoryProduct",
       type: "POST",
-      dataType: "text",
+      dataType: "json",
       contentType: "application/json",
       data: postData,
     }).done(function (data) {

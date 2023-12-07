@@ -1,7 +1,8 @@
 package com.example.controller.api;
 
-import com.example.service.CategoryService;
-import com.example.model.Category;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Map;
+import com.example.model.Category;
+import com.example.service.CategoryService;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -45,5 +45,4 @@ public class ApiCategoryController {
 			return ResponseEntity.badRequest().body("カテゴリーと商品の紐付設定更新に失敗しました。");
 		}
 	}
-
 }
