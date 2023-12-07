@@ -98,7 +98,7 @@ public class CategoryController {
 	@PutMapping
 	public String update(@Validated @ModelAttribute Category entity, BindingResult result,
 			RedirectAttributes redirectAttributes) {
-		Category category = null;
+		Category category;
 		try {
 			// descriptionは2000文字まで
 			if (!CheckUtil.checkDescriptionLength(entity.getDescription())) {
@@ -111,7 +111,7 @@ public class CategoryController {
 			redirectAttributes.addFlashAttribute("success", Message.MSG_SUCESS_UPDATE);
 			redirectAttributes.addAttribute("q", "update");
 
-			return "redirect:/categories/" + category.getId() + "/productRelation";
+			return "redirect:/categories";
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("error", Message.MSG_ERROR);
 			e.printStackTrace();

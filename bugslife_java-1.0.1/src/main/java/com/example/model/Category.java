@@ -1,7 +1,6 @@
 package com.example.model;
 
 import java.io.Serializable;
-import java.lang.String;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -13,7 +12,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,16 +28,16 @@ public class Category extends TimeEntity implements Serializable {
 	private Long id;
 
 	@Column(name = "name", nullable = false)
-	private String name;
+	private String name = "";
 
 	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
 
 	@Column(name = "code", nullable = false)
-	private String code;
+	private String code = "";
 
 	@Column(name = "display_order", nullable = false)
-	private Integer displayOrder;
+	private Integer displayOrder = 0;
 
 	@OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<CategoryProduct> categoryProducts;
