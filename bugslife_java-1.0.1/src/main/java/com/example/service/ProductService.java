@@ -20,10 +20,13 @@ import com.example.repository.ProductRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
+
+import jakarta.persistence.criteria.Predicate;
+
 import jakarta.persistence.criteria.Root;
 
 @Service
@@ -117,7 +120,15 @@ public class ProductService {
 
 		if (form.getCategories() != null && form.getCategories().size() > 0) {
 			// categories で完全一致検索
-			query.where(categoryJoin.get("id").in(form.getCategories()));
+			List<Predicate> categoryPredicates = new ArrayList<>();
+			for (Long categoryId : form.getCategories()) {
+				categoryPredicates.add(builder.equal(categoryJoin.get("id"), categoryId));
+			}
+			Predicate finalPredicate = builder.and(categoryPredicates.toArray(new Predicate[0]));
+			System.out.println("Generated Query: " + finalPredicate + "---------------");
+			TypedQuery<ProductWithCategoryName> typedQuery = entityManager.createQuery(query);
+			List<ProductWithCategoryName> resultList = typedQuery.getResultList();
+			query.where(finalPredicate);
 		}
 
 		// weight で範囲検索
