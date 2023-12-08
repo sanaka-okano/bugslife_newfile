@@ -23,6 +23,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
 
 @Service
@@ -56,14 +57,43 @@ public class ProductService {
 		productRepository.delete(entity);
 	}
 
+	public List<ProductWithCategoryName> searchAll(Long shopId, ProductSearchForm form) {
+		final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		final CriteriaQuery<ProductWithCategoryName> query = builder.createQuery(ProductWithCategoryName.class);
+		final Root<Product> root = query.from(Product.class);
+		Join<Product, CategoryProduct> categoryProductJoin = root.joinList("categoryProducts", JoinType.LEFT);
+		Join<CategoryProduct, Category> categoryJoin = categoryProductJoin.join("category", JoinType.LEFT);
+		query.multiselect(
+				root.get("id"),
+				root.get("code"),
+				root.get("name"),
+				root.get("weight"),
+				root.get("height"),
+				root.get("price"),
+				builder.coalesce(categoryJoin.get("name"), "").alias("categoryName"))
+				.where(
+						builder.and(
+								builder.equal(root.get("shopId"), shopId),
+								builder.or(
+										builder.isNull(categoryJoin.get("id")),
+										builder.isNotNull(categoryProductJoin.get("id")))));
+
+		// クエリを実行して結果を取得
+		List<ProductWithCategoryName> resultList = entityManager.createQuery(query).getResultList();
+
+		// 結果を表示
+		System.out.println("Result List: " + resultList);
+		return entityManager.createQuery(query).getResultList();
+	}
+
 	// 指定された検索条件に一致するエンティティを検索する
 	public List<ProductWithCategoryName> search(Long shopId, ProductSearchForm form) {
 		final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		final CriteriaQuery<ProductWithCategoryName> query = builder.createQuery(ProductWithCategoryName.class);
 		final Root<Product> root = query.from(Product.class);
 
-		Join<Product, CategoryProduct> categoryProductJoin = root.joinList("categoryProducts");
-		Join<CategoryProduct, Category> categoryJoin = categoryProductJoin.join("category");
+		Join<Product, CategoryProduct> categoryProductJoin = root.joinList("categoryProducts", JoinType.LEFT);
+		Join<CategoryProduct, Category> categoryJoin = categoryProductJoin.join("category", JoinType.LEFT);
 
 		query.multiselect(
 				root.get("id"),
