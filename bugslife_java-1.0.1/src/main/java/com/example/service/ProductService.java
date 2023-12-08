@@ -1,9 +1,17 @@
 package com.example.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.example.entity.ProductWithCategoryName;
+import com.example.form.ProductForm;
+import com.example.form.ProductSearchForm;
 import com.example.model.Category;
 import com.example.model.CategoryProduct;
 import com.example.model.Product;
@@ -15,15 +23,8 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
-
-import com.example.entity.ProductWithCategoryName;
-import com.example.form.ProductForm;
-import com.example.form.ProductSearchForm;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -37,7 +38,6 @@ public class ProductService {
 
 	@Autowired
 	private CategoryProductRepository categoryProductRepository;
-
 
 	public List<Product> findAll() {
 		return productRepository.findAll();
@@ -57,24 +57,52 @@ public class ProductService {
 		productRepository.delete(entity);
 	}
 
+	public List<ProductWithCategoryName> searchAll(Long shopId, ProductSearchForm form) {
+		final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		final CriteriaQuery<ProductWithCategoryName> query = builder.createQuery(ProductWithCategoryName.class);
+		final Root<Product> root = query.from(Product.class);
+		Join<Product, CategoryProduct> categoryProductJoin = root.joinList("categoryProducts", JoinType.LEFT);
+		Join<CategoryProduct, Category> categoryJoin = categoryProductJoin.join("category", JoinType.LEFT);
+		query.multiselect(
+				root.get("id"),
+				root.get("code"),
+				root.get("name"),
+				root.get("weight"),
+				root.get("height"),
+				root.get("price"),
+				builder.coalesce(categoryJoin.get("name"), "").alias("categoryName"))
+				.where(
+						builder.and(
+								builder.equal(root.get("shopId"), shopId),
+								builder.or(
+										builder.isNull(categoryJoin.get("id")),
+										builder.isNotNull(categoryProductJoin.get("id")))));
+
+		// クエリを実行して結果を取得
+		List<ProductWithCategoryName> resultList = entityManager.createQuery(query).getResultList();
+
+		// 結果を表示
+		System.out.println("Result List: " + resultList);
+		return entityManager.createQuery(query).getResultList();
+	}
+
 	// 指定された検索条件に一致するエンティティを検索する
 	public List<ProductWithCategoryName> search(Long shopId, ProductSearchForm form) {
 		final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		final CriteriaQuery<ProductWithCategoryName> query = builder.createQuery(ProductWithCategoryName.class);
 		final Root<Product> root = query.from(Product.class);
 
-		Join<Product, CategoryProduct> categoryProductJoin = root.joinList("categoryProducts");
-		Join<CategoryProduct, Category> categoryJoin = categoryProductJoin.join("category");
+		Join<Product, CategoryProduct> categoryProductJoin = root.joinList("categoryProducts", JoinType.LEFT);
+		Join<CategoryProduct, Category> categoryJoin = categoryProductJoin.join("category", JoinType.LEFT);
 
 		query.multiselect(
-			root.get("id"),
-			root.get("code"),
-			root.get("name"),
-			root.get("weight"),
-			root.get("height"),
-			root.get("price"),
-			categoryJoin.get("name").alias("categoryName")
-		).where(builder.equal(root.get("shopId"), shopId));
+				root.get("id"),
+				root.get("code"),
+				root.get("name"),
+				root.get("weight"),
+				root.get("height"),
+				root.get("price"),
+				categoryJoin.get("name").alias("categoryName")).where(builder.equal(root.get("shopId"), shopId));
 
 		// formの値を元に検索条件を設定する
 		if (!StringUtils.isEmpty(form.getName())) {
@@ -95,11 +123,19 @@ public class ProductService {
 		// weight で範囲検索
 		if (form.getWeight1() != null && form.getWeight2() != null) {
 			query.where(builder.between(root.get("weight"), form.getWeight1(), form.getWeight2()));
+		} else if (form.getWeight1() != null) {
+			query.where(builder.greaterThanOrEqualTo(root.get("weight"), form.getWeight1()));
+		} else if (form.getWeight2() != null) {
+			query.where(builder.lessThanOrEqualTo(root.get("weight"), form.getWeight2()));
 		}
 
 		// height で範囲検索
 		if (form.getHeight1() != null && form.getHeight2() != null) {
 			query.where(builder.between(root.get("height"), form.getHeight1(), form.getHeight2()));
+		} else if (form.getHeight1() != null) {
+			query.where(builder.greaterThanOrEqualTo(root.get("height"), form.getHeight1()));
+		} else if (form.getHeight2() != null) {
+			query.where(builder.lessThanOrEqualTo(root.get("height"), form.getHeight2()));
 		}
 
 		// price で範囲検索
@@ -110,19 +146,21 @@ public class ProductService {
 		} else if (form.getPrice2() != null) {
 			query.where(builder.lessThanOrEqualTo(root.get("price"), form.getPrice2()));
 		}
-
 		return entityManager.createQuery(query).getResultList();
 	}
 
 	/**
 	 * ProductFormの内容を元に商品情報を保存する
+	 * 
 	 * @param entity
 	 * @return
 	 */
 	@Transactional(readOnly = false)
 	public Product save(ProductForm entity) {
 		// 紐づくカテゴリを事前に取得
-		List<CategoryProduct> categoryProducts = entity.getId() != null ? categoryProductRepository.findByProductId(entity.getId()) : new ArrayList<>();
+		List<CategoryProduct> categoryProducts = entity.getId() != null
+				? categoryProductRepository.findByProductId(entity.getId())
+				: new ArrayList<>();
 
 		Product product = new Product(entity);
 		productRepository.save(product);
