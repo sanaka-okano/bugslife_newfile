@@ -1,6 +1,7 @@
 package com.example.form;
 
 import java.util.List;
+import java.util.Objects;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +19,8 @@ public class ProductSearchForm {
 	private Double price1;
 	private Double price2;
 
-	public ProductSearchForm(String name, String code, List<Long> categories, Integer weight1, Integer weight2, Integer height1, Integer height2, Double price1, Double price2) {
+	public ProductSearchForm(String name, String code, List<Long> categories, Integer weight1, Integer weight2,
+			Integer height1, Integer height2, Double price1, Double price2) {
 		this.setName(name);
 		this.setCode(code);
 		this.setCategories(categories);
@@ -28,5 +30,18 @@ public class ProductSearchForm {
 		this.setHeight2(height2);
 		this.setPrice1(price1);
 		this.setPrice2(price2);
+	}
+
+	// @return 検索条件が一つでも入力されている場合はture、それ以外はfalse//
+	public boolean hasSearchCriteria() {
+		return Objects.nonNull(name)
+				|| Objects.nonNull(code)
+				|| Objects.nonNull(categories)
+				|| Objects.nonNull(weight1)
+				|| Objects.nonNull(weight2)
+				|| Objects.nonNull(height1)
+				|| Objects.nonNull(height2)
+				|| Objects.nonNull(price1)
+				|| Objects.nonNull(price2);
 	}
 }

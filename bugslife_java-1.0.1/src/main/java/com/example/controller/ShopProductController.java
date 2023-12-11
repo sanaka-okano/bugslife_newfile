@@ -38,16 +38,25 @@ public class ShopProductController {
 	@Autowired
 	private CategoryService categoryService;
 
-
 	@GetMapping
 	public String index(Model model, @PathVariable("shopId") Long shopId, @ModelAttribute ProductSearchForm request) {
-		List<ProductWithCategoryName> all = productService.search(shopId, request);
-		List<Category> categories = categoryService.findAll();
-		model.addAttribute("listProduct", all);
-		model.addAttribute("categories", categories);
-		model.addAttribute("request", request);
-		model.addAttribute("shopId", shopId);
-		return "shop_product/index";
+		if (request.hasSearchCriteria()) {
+			List<ProductWithCategoryName> all = productService.search(shopId, request);
+			List<Category> categories = categoryService.findAll();
+			model.addAttribute("listProduct", all);
+			model.addAttribute("categories", categories);
+			model.addAttribute("request", request);
+			model.addAttribute("shopId", shopId);
+			return "shop_product/index";
+		} else {
+			List<ProductWithCategoryName> allProducts = productService.searchAll(shopId, request);
+			List<Category> categories = categoryService.findAll();
+			model.addAttribute("listProduct", allProducts);
+			model.addAttribute("categories", categories);
+			model.addAttribute("request", request);
+			model.addAttribute("shopId", shopId);
+			return "shop_product/index";
+		}
 	}
 
 	@GetMapping("/{id}")
@@ -73,7 +82,8 @@ public class ShopProductController {
 	}
 
 	@PostMapping
-	public String create(Model model, @PathVariable("shopId") Long shopId, @Validated @ModelAttribute ProductForm productForm,
+	public String create(Model model, @PathVariable("shopId") Long shopId,
+			@Validated @ModelAttribute ProductForm productForm,
 			BindingResult result, RedirectAttributes redirectAttributes) {
 		// バリデーションチェック
 		if (result.hasErrors()) {
@@ -113,8 +123,9 @@ public class ShopProductController {
 	}
 
 	@PutMapping
-	public String update(Model model, @PathVariable("shopId") Long shopId, @Validated @ModelAttribute ProductForm productForm,
-			BindingResult result,RedirectAttributes redirectAttributes) {
+	public String update(Model model, @PathVariable("shopId") Long shopId,
+			@Validated @ModelAttribute ProductForm productForm,
+			BindingResult result, RedirectAttributes redirectAttributes) {
 		System.out.append(Message.MSG_ERROR, 0, 0);
 		// バリデーションチェック
 		if (result.hasErrors()) {
