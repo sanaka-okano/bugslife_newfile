@@ -10,7 +10,8 @@
 
     <div class="form-group">
       <label for="name">取引先会社名</label>
-      <input id="name" name="name" type="text" class="form-control" th:field="*{name}" />
+      <input id="name" name="name" type="text" class="form-control" th:field="*{name}" th:errorclass="is-invalid" />
+      <div class="invalid-feedback" th:errors="*{name}"></div>
     </div>
     <div class="form-group">
       <label for="email">Email</label>
