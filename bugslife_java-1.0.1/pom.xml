@@ -16,7 +16,6 @@
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<java.version>17</java.version>
-		<hibernate.version>6.2.6.Final</hibernate.version> <!-- 既存のバージョンをアップデート -->
 	</properties>
 	<dependencies>
 
@@ -111,16 +110,26 @@
 			<version>1.7</version>
 		</dependency>
 
+		<!-- JPA 依存関係 -->
 		<dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>javax.persistence-api</artifactId>
-			<version>2.2</version>
+			<groupId>jakarta.persistence</groupId>
+			<artifactId>jakarta.persistence-api</artifactId>
+			<version>3.0.0</version>
+			<scope>provided</scope>
 		</dependency>
 
+		<!-- Hibernate 依存関係 -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
-			<version>${hibernate.version}</version>
+			<version>6.0.0.Final</version>
+		</dependency>
+
+		<!-- JAXB 依存関係 -->
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<version>3.0.2</version>
 		</dependency>
 
 	</dependencies>
