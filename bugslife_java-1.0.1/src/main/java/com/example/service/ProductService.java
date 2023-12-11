@@ -24,9 +24,8 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
-
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
-
 import jakarta.persistence.criteria.Root;
 
 @Service
@@ -124,11 +123,8 @@ public class ProductService {
 			for (Long categoryId : form.getCategories()) {
 				categoryPredicates.add(builder.equal(categoryJoin.get("id"), categoryId));
 			}
-			Predicate finalPredicate = builder.and(categoryPredicates.toArray(new Predicate[0]));
-			System.out.println("Generated Query: " + finalPredicate + "---------------");
-			TypedQuery<ProductWithCategoryName> typedQuery = entityManager.createQuery(query);
-			List<ProductWithCategoryName> resultList = typedQuery.getResultList();
-			query.where(finalPredicate);
+			Predicate finalPredicate = builder.or(categoryPredicates.toArray(new Predicate[0]));
+			query.where(builder.equal(root.get("shopId"), shopId), finalPredicate);
 		}
 
 		// weight で範囲検索
@@ -157,12 +153,14 @@ public class ProductService {
 		} else if (form.getPrice2() != null) {
 			query.where(builder.lessThanOrEqualTo(root.get("price"), form.getPrice2()));
 		}
-		return entityManager.createQuery(query).getResultList();
+		TypedQuery<ProductWithCategoryName> typedQuery = entityManager.createQuery(query);
+		return typedQuery.getResultList();
+
 	}
 
 	/**
 	 * ProductFormの内容を元に商品情報を保存する
-	 * 
+	 *
 	 * @param entity
 	 * @return
 	 */
