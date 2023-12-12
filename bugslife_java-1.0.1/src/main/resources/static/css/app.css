@@ -17,9 +17,43 @@
 }
 
 /* 詳細 */
-span.font-impact {
-  font-family: "Impact";
+.font-impact{
   font-size: small;
+  font-family: "游ゴシック体","YuGothic"
+}
+
+.btn-warning{
+  background-color: #0F6DFD;
+  border: #0F6DFD;
+  color: #fff;
+}
+.btn-warning:hover{
+  background-color: #0000E6;
+  border: #0000E6;
+  color: #fff;
+}
+
+.btn-light{
+  background-color: #797979;
+  border: #797979;
+  color: #fff;
+}
+
+.btn-light:hover{
+  background-color: #6D757D;
+  border: #6D757D;
+  color: #fff;
+}
+
+.btn-info{
+  background-color: #DC3545;
+  border: #DC3545;
+  color: #fff;
+}
+.btn-info:hover{
+  background-color: #ED1C24;
+  border: #ED1C24;
+  color: #fff;
 }
 
 a.btn {
@@ -92,7 +126,7 @@ a.btn-link {
     height: 3000px;
   }
   span.font-impact {
-    font-size: x-large;
+    font-size: small;
   }
 }
 
@@ -117,6 +151,6 @@ a.btn-link {
     width: 1500px;
   }
   span.font-impact {
-    font-size: xx-large;
+    font-size: small;
   }
 }
