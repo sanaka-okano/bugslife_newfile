@@ -109,12 +109,12 @@ public class ProductService {
 		// formの値を元に検索条件を設定する
 		if (!StringUtils.isEmpty(form.getName())) {
 			// name で部分一致検索
-			query.where(builder.like(root.get("name"), "%" + form.getName() + "%"));
+			query.where(builder.like(builder.lower(root.get("name")), "%" + form.getName().toLowerCase() + "%"));
 		}
 
 		if (!StringUtils.isEmpty(form.getCode())) {
 			// code で部分一致検索
-			query.where(builder.like(root.get("code"), "%" + form.getCode() + "%"));
+			query.where(builder.like(builder.lower(root.get("code")), "%" + form.getCode().toLowerCase() + "%"));
 		}
 
 		if (form.getCategories() != null && form.getCategories().size() > 0) {
