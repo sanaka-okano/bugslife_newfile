@@ -54,7 +54,7 @@ public class Campaign extends TimeEntity implements Serializable {
 	private DiscountType discountType = DiscountType.valueOf(0);
 
 	@Enumerated(EnumType.ORDINAL)
-	@Column(name = "status", nullable = false)
+	@Column(name = "status", nullable = false, columnDefinition = "TINYINT")
 	private CampaignStatus status = CampaignStatus.valueOf(0);
 
 	@Column(name = "description", nullable = false, columnDefinition = "TEXT")
@@ -69,6 +69,6 @@ public class Campaign extends TimeEntity implements Serializable {
 		this.discountType = discountType;
 		this.status = status;
 		this.description = description;
-
 	}
+
 }
