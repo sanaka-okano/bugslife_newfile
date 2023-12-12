@@ -3,6 +3,13 @@
   table-layout: fixed;
 }
 
+.app-table td{
+  width: 20%;
+  word-wrap: break-word;
+  white-space: normal;
+  height: 100px;
+}
+
 .text-overflow {
   white-space: nowrap;
   overflow: hidden;
@@ -16,7 +23,7 @@ span.font-impact {
 }
 
 a.btn {
-  font-weight: 700;
+  /* font-weight: 700; */
   height: 36px;
   -moz-user-select: none;
   -webkit-user-select: none;
@@ -27,6 +34,17 @@ a.btn {
 a.btn-link {
   font-weight: 700;
   height: 36px;
+}
+.btn-secondary{
+  background-color: #6D757D;
+}
+.btn-destroy{
+  color:#fff;
+  background-color: #DC3545;
+}
+.btn-destroy:hover{
+  background-color: 	#ED1C24;
+  color: #fff;
 }
 
 
@@ -61,9 +79,14 @@ a.btn-link {
 /* タブレット */
 @media (max-width: 768px) { 
   /* 一覧 */
+
   .for-tablet {
     display: none;
   }
+  a.btn{
+    height: auto;
+  }
+  
   .app-show-container {
     width: 1500px;
     height: 3000px;
@@ -76,8 +99,18 @@ a.btn-link {
 /* スマホ */
 @media (max-device-width: 500px) {
   /* 一覧 */
+  .app-table th{
+    width: 50%;
+    justify-content: space-between;
+  }
   .for-pc.for-tablet {
     display: none;
+  }
+
+  .app-table td{
+    width: 100px;
+    word-wrap: break-word;
+    white-space: normal;
   }
   
   .app-show-container {
