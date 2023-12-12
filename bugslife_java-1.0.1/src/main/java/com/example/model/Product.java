@@ -1,7 +1,6 @@
 package com.example.model;
 
 import java.io.Serializable;
-import java.lang.String;
 import java.util.List;
 
 import com.example.form.ProductForm;
@@ -15,10 +14,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import jakarta.persistence.OneToMany;
 
 @Getter
 @Setter
@@ -48,7 +47,7 @@ public class Product extends TimeEntity implements Serializable {
 	private Integer height;
 
 	@Column(name = "price", nullable = false)
-	private Integer price;
+	private double price;
 
 	@Column(name = "tax_type", nullable = false)
 	private Integer taxType;
