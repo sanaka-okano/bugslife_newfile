@@ -1,18 +1,5 @@
 package com.example.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.stereotype.Service;
-
-import com.example.enums.CampaignStatus;
-import com.example.enums.DiscountType;
-import com.example.model.Campaign;
-import com.example.repository.CampaignRepository;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -21,6 +8,19 @@ import java.sql.Types;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.enums.CampaignStatus;
+import com.example.enums.DiscountType;
+import com.example.model.Campaign;
+import com.example.repository.CampaignRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -111,18 +111,19 @@ public class CampaignService {
 	 * @param nexStatus 更新後ステータス
 	 * @throws Exception
 	 */
-	@Transactional(readOnly = false, rollbackFor = RuntimeException.class)
+	@Transactional(readOnly = false, rollbackFor = Exception.class)
 	public void bulkStatusUpdate(List<Long> idList, CampaignStatus nexStatus) throws Exception {
 		try {
-			idList.forEach(id -> {
-				Campaign campaign = campaignRepository.findById(id).get();
+			for (Long id : idList) {
+				Campaign campaign = campaignRepository.findById(id)
+						.orElseThrow(() -> new RuntimeException("IDが" + id + "のキャンペーンが見つかりませんでした。"));
 				// 更新前後のステータスが同じ場合はエラー
 				if (nexStatus.getId() == campaign.getStatus().getId()) {
 					throw new RuntimeException(campaign.getName() + "にステータスの変更がないため、ステータスの一括更新に失敗しました。");
 				}
 				campaign.setStatus(nexStatus);
 				campaignRepository.save(campaign);
-			});
+			}
 		} catch (RuntimeException e) {
 			throw new Exception(e.getMessage());
 		}
