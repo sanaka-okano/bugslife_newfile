@@ -72,7 +72,7 @@ public class ProductService {
 				root.get("weight"),
 				root.get("height"),
 				root.get("price"),
-				builder.coalesce(categoryJoin.get("name"), "").alias("categoryName"))
+				categoryJoin.get("name").alias("categoryName"))
 				.where(
 						builder.and(
 								builder.equal(root.get("shopId"), shopId),

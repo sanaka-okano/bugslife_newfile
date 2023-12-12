@@ -19,11 +19,11 @@ public class ProductWithCategoryName {
 
 	private Integer height;
 
-	private Integer price;
+	private double price;
 
 	private String categoryName;
 
-	public ProductWithCategoryName(Long id, String code, String name, Integer weight, Integer height, Integer price,
+	public ProductWithCategoryName(Long id, String code, String name, Integer weight, Integer height, double price,
 			String categoryName) {
 		this.setId(id);
 		this.setCode(code);
