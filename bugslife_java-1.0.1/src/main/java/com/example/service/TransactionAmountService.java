@@ -1,8 +1,19 @@
 package com.example.service;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.constants.Validate;
 import com.example.enums.FileImportStatus;
@@ -12,17 +23,6 @@ import com.example.model.FileImportInfo;
 import com.example.model.TransactionAmount;
 import com.example.repository.FileImportInfoRepository;
 import com.example.repository.TransactionAmountRepository;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -72,11 +72,11 @@ public class TransactionAmountService {
 			return false;
 		}
 		// 金額が0以上か
-		if (entity.getPrice() <= 0) {
+		if (entity.getPrice() < 0) {
 			return false;
 		}
 		// 金額が10億円以下か
-		if (entity.getPrice() >= Validate.PRICE_UPPER) {
+		if (entity.getPrice() > Validate.PRICE_UPPER) {
 			return false;
 		}
 		// 支出の場合、金額が5億以下か
