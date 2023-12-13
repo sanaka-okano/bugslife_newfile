@@ -110,7 +110,7 @@ public class CompanyController {
 		try {
 			company = companyService.save(entity);
 			redirectAttributes.addFlashAttribute("success", Message.MSG_SUCESS_INSERT);
-			return "redirect:/companies";
+			return "company/show";
 		} catch (Exception e) {
 			redirectAttributes.addFlashAttribute("error", Message.MSG_ERROR);
 			e.printStackTrace();
