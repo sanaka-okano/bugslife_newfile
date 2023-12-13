@@ -34,12 +34,12 @@ public class CategoryProduct extends TimeEntity implements Serializable {
 	@Column(name = "product_id", nullable = false)
 	private Long productId;
 
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(nullable = true, insertable = false, updatable = false, name = "category_id")
 	@JsonIgnore
 	private Category category;
 
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(nullable = true, insertable = false, updatable = false, name = "product_id")
 	@JsonIgnore
 	private Product product;

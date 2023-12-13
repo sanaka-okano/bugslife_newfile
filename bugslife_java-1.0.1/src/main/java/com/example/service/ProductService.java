@@ -1,6 +1,7 @@
 package com.example.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +17,7 @@ import com.example.model.Category;
 import com.example.model.CategoryProduct;
 import com.example.model.Product;
 import com.example.repository.CategoryProductRepository;
+import com.example.repository.CategoryRepository;
 import com.example.repository.ProductRepository;
 
 import jakarta.persistence.EntityManager;
@@ -23,6 +25,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -40,6 +43,9 @@ public class ProductService {
 
 	@Autowired
 	private CategoryProductRepository categoryProductRepository;
+
+	@Autowired
+	private CategoryRepository categoryRepository;
 
 	public List<Product> findAll() {
 		return productRepository.findAll();
@@ -65,6 +71,9 @@ public class ProductService {
 		final Root<Product> root = query.from(Product.class);
 		Join<Product, CategoryProduct> categoryProductJoin = root.joinList("categoryProducts", JoinType.LEFT);
 		Join<CategoryProduct, Category> categoryJoin = categoryProductJoin.join("category", JoinType.LEFT);
+		Expression<String> categoriesExpression = builder.function("GROUP_CONCAT", String.class,
+				categoryJoin.get("name"));
+
 		query.multiselect(
 				root.get("id"),
 				root.get("code"),
@@ -72,7 +81,7 @@ public class ProductService {
 				root.get("weight"),
 				root.get("height"),
 				root.get("price"),
-				categoryJoin.get("name").alias("categoryName"))
+				categoriesExpression.alias("categories"))
 				.where(
 						builder.and(
 								builder.equal(root.get("shopId"), shopId),
@@ -80,12 +89,14 @@ public class ProductService {
 										builder.isNull(categoryJoin.get("id")),
 										builder.isNotNull(categoryProductJoin.get("id")))));
 
+		query.groupBy(root.get("id"));
+
 		// クエリを実行して結果を取得
 		List<ProductWithCategoryName> resultList = entityManager.createQuery(query).getResultList();
 
 		// 結果を表示
-		System.out.println("Result List: " + resultList);
-		return entityManager.createQuery(query).getResultList();
+		System.out.println("--------------------------------------------Result List: " + resultList);
+		return resultList;
 	}
 
 	// 指定された検索条件に一致するエンティティを検索する
@@ -97,6 +108,9 @@ public class ProductService {
 		Join<Product, CategoryProduct> categoryProductJoin = root.joinList("categoryProducts", JoinType.LEFT);
 		Join<CategoryProduct, Category> categoryJoin = categoryProductJoin.join("category", JoinType.LEFT);
 
+		Expression<String> categoriesExpression = builder.function("GROUP_CONCAT", String.class,
+				categoryJoin.get("name"));
+
 		query.multiselect(
 				root.get("id"),
 				root.get("code"),
@@ -104,7 +118,9 @@ public class ProductService {
 				root.get("weight"),
 				root.get("height"),
 				root.get("price"),
-				categoryJoin.get("name").alias("categoryName")).where(builder.equal(root.get("shopId"), shopId));
+				categoriesExpression.alias("categories"))
+				.where(builder.equal(root.get("shopId"), shopId));
+		query.groupBy(root.get("id"));
 
 		// formの値を元に検索条件を設定する
 		if (!StringUtils.isEmpty(form.getName())) {
@@ -154,6 +170,7 @@ public class ProductService {
 			query.where(builder.lessThanOrEqualTo(root.get("price"), form.getPrice2()));
 		}
 		TypedQuery<ProductWithCategoryName> typedQuery = entityManager.createQuery(query);
+		System.out.println("-----------------" + typedQuery.getResultList());
 		return typedQuery.getResultList();
 
 	}
@@ -172,6 +189,7 @@ public class ProductService {
 				: new ArrayList<>();
 
 		Product product = new Product(entity);
+		product.setCategories(new HashSet<>(categoryRepository.findAllById(entity.getCategoryIds())));
 		productRepository.save(product);
 
 		// 未処理のカテゴリーIDのリスト
