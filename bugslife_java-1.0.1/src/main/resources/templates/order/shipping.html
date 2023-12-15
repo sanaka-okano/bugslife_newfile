@@ -9,7 +9,7 @@
   <div class="mb-4">
     <div class="row">
       <!-- CSVの読み込み -->
-      <form class="row col-6" th:action="@{/orders/shipping}" method="post" enctype="multipart/form-data">
+      <form class="row col-6" th:action="@{/orders/upload_file}" method="post" enctype="multipart/form-data">
         <div class="input-group">
           <input class="form-control" type="file" id="file" name="file" accept=".csv" />
           <button type="submit" class="btn btn-primary">読込</button>

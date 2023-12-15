@@ -1,7 +1,6 @@
 package com.example.model;
 
 import java.io.Serializable;
-import java.lang.String;
 import java.util.List;
 
 import com.example.enums.OrderStatus;
@@ -74,6 +73,10 @@ public class Order extends TimeEntity implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "order_id")
 	private List<OrderPayment> orderPayments;
+
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinColumn(name = "order_id")
+	private List<OrderDeliveries> orderDeliveries;
 
 	/**
 	 * 支払い方法名を取得する
