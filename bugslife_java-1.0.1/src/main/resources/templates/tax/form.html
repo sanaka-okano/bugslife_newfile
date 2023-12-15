@@ -9,7 +9,7 @@
 
             <div class="form-group">
                 <label for="name">税率</label>
-                <input id="rate" name="rate" type="text" class="form-control" th:field="*{rate}" th:errorclass="is-invalid" />
+                <input id="rate" name="rate" type="number" class="form-control" th:field="*{rate}" th:errorclass="is-invalid" />
                 <div class="invalid-feedback" th:errors="*{rate}"></div>
             </div>
             <button type="submit" class="btn btn-success">保存</button>

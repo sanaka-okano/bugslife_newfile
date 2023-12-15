@@ -1,8 +1,6 @@
 package com.example.form;
 
-import java.util.List;
-import java.util.Objects;
-
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +10,21 @@ public class TaxForm {
 
 	private long id;
 
-	
+	@NotBlank(message = "税率を入力してください")
+	private int rate;
+
+	private Boolean taxIncluded;
+
+	private String rounding;
+
+	/**
+	 * Rounding
+	 */
+	public static final String FLOOR = "floor";
+	public static final String ROUND = "round";
+	public static final String CEIL = "ceil";
+
+
+
 
 }

@@ -7,25 +7,12 @@
   <th:block layout:fragment="content">
     <body>
       <h1>税率参照</h1>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>TaxRate</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr th:each="tax : ${listtax}">
-            <td th:text="${tax.rate}"></td>
-            <td>
-                <!-- <a class="btn btn-primary" th:href="@{/companies/{id}(id = ${company.id})}">詳細</a>
-                <a class="btn btn-secondary" th:href="@{/companies/{id}/edit(id = ${company.id})}">編集</a>
-                <form class="d-inline" th:action="@{/companies/{id}(id = ${company.id})}" th:method="delete">
-                <button class="btn btn-danger" type="submit">削除</button>
-              </form> -->
-            </td>
-          </tr>
-      </table>
+      <hr />
+      <div class="form-group">
+        <label for="rate">税率</label>
+        <span th:text="${tax.rate}"></span>
+      </div>
+      <a class="btn btn-link" th:href="@{/taxs}">一覧へ戻る</a>
     </body>
   </th:block>
 </html>
