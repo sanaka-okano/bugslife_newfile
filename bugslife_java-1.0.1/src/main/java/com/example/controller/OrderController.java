@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.constants.Message;
@@ -24,6 +26,8 @@ import com.example.enums.PaymentMethod;
 import com.example.enums.PaymentStatus;
 import com.example.form.OrderForm;
 import com.example.model.Order;
+import com.example.model.OrderDeliveries;
+import com.example.service.OrderDeliveriesService;
 import com.example.service.OrderService;
 import com.example.service.ProductService;
 
@@ -36,6 +40,9 @@ public class OrderController {
 
 	@Autowired
 	private ProductService productService;
+
+	@Autowired
+	private OrderDeliveriesService orderDeliveriesService;
 
 	@GetMapping
 	public String index(Model model) {
@@ -52,6 +59,16 @@ public class OrderController {
 		}
 		return "order/show";
 	}
+
+	@GetMapping(value = "/shipping")
+	public String shipping(Model model) {
+		List<OrderDeliveries> orderDeliveriesList = orderDeliveriesService.findAll();
+		model.addAttribute("orderShippingList", orderDeliveriesList);
+		model.addAttribute("products", productService.findAll());
+		model.addAttribute("paymentMethods", PaymentMethod.values());
+		return "order/shipping";
+	}
+
 
 	@GetMapping(value = "/new")
 	public String create(Model model, @ModelAttribute OrderForm.Create entity) {
@@ -134,5 +151,29 @@ public class OrderController {
 			e.printStackTrace();
 			return "redirect:/orders";
 		}
+	}
+
+	@PostMapping("/upload_file")
+	public String uploadFile(@RequestParam("file") MultipartFile uploadFile, RedirectAttributes redirectAttributes) {
+
+		if (uploadFile.isEmpty()) {
+			// ファイルが存在しない場合
+			redirectAttributes.addFlashAttribute("error", "ファイルを選択してください。");
+			return "redirect:/order/shipping";
+		}
+		if (!"text/csv".equals(uploadFile.getContentType())) {
+			// CSVファイル以外の場合
+			redirectAttributes.addFlashAttribute("error", "CSVファイルを選択してください。");
+			return "redirect:/order/shipping";
+		}
+		try {
+			orderDeliveriesService.importCSV(uploadFile);
+		} catch (Throwable e) {
+			redirectAttributes.addFlashAttribute("error", e.getMessage());
+			e.printStackTrace();
+			return "redirect:/order/shipping";
+		}
+
+		return "redirect:/order/shipping";
 	}
 }
