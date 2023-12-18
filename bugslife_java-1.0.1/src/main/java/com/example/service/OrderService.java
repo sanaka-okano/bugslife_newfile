@@ -1,22 +1,25 @@
 package com.example.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+// import org.hibernate.engine.internal.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.constants.TaxType;
 import com.example.enums.OrderStatus;
 import com.example.enums.PaymentStatus;
 import com.example.form.OrderForm;
 import com.example.model.Order;
+import com.example.model.OrderDeliveries;
 import com.example.model.OrderPayment;
 import com.example.model.OrderProduct;
 import com.example.repository.OrderRepository;
 import com.example.repository.ProductRepository;
-
-import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.Optional;
-import java.util.ArrayList;
 
 @Service
 @Transactional(readOnly = true)
@@ -40,6 +43,16 @@ public class OrderService {
 	public Order save(Order entity) {
 		return orderRepository.save(entity);
 	}
+
+	public List<OrderDeliveries> getOrderDeliveriesByOrderId(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+
+        if (order != null) {
+            return order.getOrderDeliveriesList();
+        } else {
+            return Collections.emptyList();
+        }
+    }
 
 	@Transactional(readOnly = false)
 	public Order create(OrderForm.Create entity) {

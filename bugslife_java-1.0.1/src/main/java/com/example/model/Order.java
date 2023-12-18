@@ -74,10 +74,12 @@ public class Order extends TimeEntity implements Serializable {
 	@JoinColumn(name = "order_id")
 	private List<OrderPayment> orderPayments;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "order_id")
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)	
 	private List<OrderDeliveries> orderDeliveries;
 
+	public List<OrderDeliveries> getOrderDeliveriesList() {
+        return orderDeliveries;
+    }
 	/**
 	 * 支払い方法名を取得する
 	 */

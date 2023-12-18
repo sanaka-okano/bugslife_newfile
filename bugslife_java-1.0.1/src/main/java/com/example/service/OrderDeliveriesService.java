@@ -8,8 +8,10 @@ import java.sql.Types;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+// import org.hibernate.engine.internal.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -18,12 +20,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.model.Order;
 import com.example.model.OrderDeliveries;
 import com.example.repository.OrderDeliveriesRepository;
+import com.example.repository.OrderRepository;
 
 @Service
 public class OrderDeliveriesService {
 	
+	@Autowired
+	private OrderRepository orderRepository;
+
 	@Autowired
 	private OrderDeliveriesRepository orderDeliveriesRepository;
 
@@ -37,6 +44,41 @@ public class OrderDeliveriesService {
 		System.out.println("--------------------------");
 		return orderDeliveriesRepository.findAll();
 	}
+
+	public List<OrderDeliveries> addOrderDeliveriesForOrderedOrders() {
+		List<OrderDeliveries> orderDeliveriesList = new ArrayList<>();
+		// order テーブルからステータスが "ordered" の全てのオーダーを取得
+		List<Order> orderedOrders = orderRepository.findByStatus("ordered");
+		// 取得したオーダーに対応する OrderDeliveries エントリを生成して order_deliveries テーブルに挿入
+		for (Order orderedOrder : orderedOrders) {
+			OrderDeliveries orderDeliveries = new OrderDeliveries();
+			orderDeliveries.setOrderId(orderedOrder.getId());
+			//idが同じ場合はインクリメントしない
+	
+			orderDeliveriesRepository.save(orderDeliveries);
+			orderDeliveriesList.add(orderDeliveries);
+		}
+		return orderDeliveriesList;
+	}
+
+
+public List<OrderDeliveries> getOrderDeliveriesByOrderId(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+
+        if (order != null) {
+            return order.getOrderDeliveriesList();
+        } else {
+            // Order が存在しない場合は空のリストを返す
+            return Collections.emptyList();
+        }
+    }
+
+
+	public List<OrderDeliveries> getOrderedStatus() {
+        // 新しいメソッドを呼び出すように変更
+		System.out.println("-------------");
+        return orderDeliveriesRepository.findAllByOrder_Status("ordered");
+    }
 
 
 	// *CSVインポート処理**
