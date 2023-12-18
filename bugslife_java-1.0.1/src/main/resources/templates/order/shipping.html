@@ -30,7 +30,7 @@
   <!-- CSVの読み込み内容を表示する -->
   <div th:if="${orderShippingData}">
     <!-- チェックを入れたデータのみ出荷済みに更新する -->
-    <form th:action="@{/orders/shipping}" th:method="'put'" th:object="${orderShippingData}">
+    <!-- <form th:action="@{/orders/shipping}" th:method="'put'" th:object="${orderShippingData}"> -->
       <button type="submit" class="btn btn-success">出荷情報更新</button>
       <table class="table">
         <thead>
@@ -49,11 +49,11 @@
             <td>
               <input class="row_check" type="checkbox" th:field="*{orderShippingList[__${st.index}__].checked}" />
             </td>
-            <td>
-              <th:block th:text="${orderShipping.orderId}"></th:block>
+            <td th:text="${orderShipping.orderId}">
+              <!-- <th:block th:text="${orderShipping.orderId}"></th:block> -->
               <input type="hidden" th:field="*{orderShippingList[__${st.index}__].orderId}" />
             </td>
-            <td>
+            <!-- <td>
               <th:block th:text="${orderShipping.shippingCode}"></th:block>
               <input type="hidden" th:field="*{orderShippingList[__${st.index}__].shippingCode}" />
             </td>
@@ -72,11 +72,11 @@
             <td>
               <span class="badge text-bg-danger" th:if="${orderShipping.uploadStatus == 'error'}">エラー</span>
               <span class="badge text-bg-success" th:if="${orderShipping.uploadStatus == 'success'}">成功</span>
-            </td>
+            </td> -->
           </tr>
         </tbody>
       </table>
-    </form>
+    <!-- </form> -->
   </div>
 </th:block>
 

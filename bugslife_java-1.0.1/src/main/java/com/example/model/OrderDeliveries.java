@@ -17,7 +17,6 @@ import jakarta.persistence.Table;
 public class OrderDeliveries {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "order_id")
 	private Long id;
 
 	@Column(name = "shipping_code")
@@ -33,9 +32,13 @@ public class OrderDeliveries {
 	private String deliveryTimezome;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "order_id", insertable = false, updatable = false)
+	@JoinColumn(name = "order_id")
 	private Order order;
 
+	public OrderDeliveries() {
+		// デフォルトコンストラクタ
+	}
+	
 	public OrderDeliveries(Long id, String shippingCode, LocalDate shippingDate, LocalDate deliveryDate, String deliveryTimezome){
 		this.id = id;
 		this.shippingCode = shippingCode;
@@ -61,4 +64,15 @@ public class OrderDeliveries {
 	public String getDeliveryTimezome(){
 		return deliveryTimezome;
 	}
+
+	public void setOrder(Order order) {
+		this.order = order;
+	}
+	
+	public void setOrderId(Long orderId) {
+        if (order == null) {
+            order = new Order();
+        }
+        order.setId(orderId);
+    }
 }

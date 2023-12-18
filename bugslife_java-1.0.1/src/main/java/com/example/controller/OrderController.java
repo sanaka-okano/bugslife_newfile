@@ -62,10 +62,10 @@ public class OrderController {
 
 	@GetMapping(value = "/shipping")
 	public String shipping(Model model) {
-		List<OrderDeliveries> orderDeliveriesList = orderDeliveriesService.findAll();
+		List<OrderDeliveries> orderShippingData = orderDeliveriesService.findAll();
+		List<OrderDeliveries> orderDeliveriesList = orderDeliveriesService.addOrderDeliveriesForOrderedOrders();
 		model.addAttribute("orderShippingList", orderDeliveriesList);
-		model.addAttribute("products", productService.findAll());
-		model.addAttribute("paymentMethods", PaymentMethod.values());
+		model.addAttribute("orderShippingData", orderShippingData);
 		return "order/shipping";
 	}
 
