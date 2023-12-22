@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/layout}">
+<th:block layout:fragment="content">
+  <h1>受注 入金データ登録</h1>
+  <hr />
+  <a th:href="@{/orders}" class="btn btn-default">Back</a><br /><br />
+
+  <div class="mb-4">
+    <div class="row">
+      <!-- CSVの読み込み -->
+      <form class="row col-6" th:action="@{/orders/payment/upload_file}" method="post" enctype="multipart/form-data">
+        <div class="input-group">
+          <input class="form-control" type="file" id="file" name="file" accept=".csv" />
+          <button type="submit" class="btn btn-primary">読込</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CSVの各行のバリデーションチェック後のエラーを表示する -->
+  <div th:if="${validationError}" th:each="error : ${validationError}">
+    <label class="text-danger" th:text="${error}"></label>
+  </div>
+
+  <!-- CSVの読み込み内容を表示する -->
+  <div th:if="${orderPaymentData}">
+    <!-- チェックを入れたデータのみ出荷済みに更新する -->
+    <form th:action="@{/orders/payment}" th:method="'put'" th:object="${orderPaymentData}">
+      <button type="submit" class="btn btn-success">出荷情報更新</button>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>受注ID</th>
+            <th>金額</th>
+            <th>支払い方法</th>
+            <th>ステータス</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="orderPayment, st : *{orderPaymentList}">
+            <td>
+              <th:block th:text="${orderPayment.orderId}"></th:block>
+              <input type="hidden" th:field="*{orderPaymentList[__${st.index}__].orderId}" />
+            </td>
+            <td>
+              <th:block th:text="${orderPayment.paid}"></th:block>
+              <input type="hidden" th:field="*{orderPaymentList[__${st.index}__].paid}" />
+            </td>
+            <td>
+              <th:block th:text="${orderPayment.method}"></th:block>
+              <input type="hidden" th:field="*{orderPaymentList[__${st.index}__].method}" />
+            </td>
+            <td>
+              <th:block th:text="${orderPayment.type}"></th:block>
+              <input type="hidden" th:field="*{orderPaymentList[__${st.index}__].type}" />
+            </td>
+            <td>
+                <a class="btn btn-primary" th:href="@{/orders/{id}(id = ${orderPayment.orderId})}">詳細</a>
+            </td>
+            <!-- <td>
+              <span class="badge text-bg-danger" th:if="${orderPayment.uploadStatus == 'error'}">エラー</span>
+              <span class="badge text-bg-success" th:if="${orderPayment.uploadStatus == 'success'}">成功</span>
+            </td> -->
+          </tr>
+        </tbody>
+      </table>
+    </form>
+  </div>
+</th:block>
+
+</html>
+<script src="/js/order/order-shipping.js"></script>

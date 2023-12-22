@@ -2,9 +2,14 @@ package com.example.form;
 
 import java.sql.Timestamp;
 import java.util.List;
+
+
+import com.example.model.OrderPayment;
+
 import java.util.Set;
 
 import com.example.model.OrderDeliveries;
+
 
 import lombok.Data;
 import lombok.Getter;
@@ -97,6 +102,11 @@ public class OrderForm {
 	}
 
 	@Data
+	public class OrderPaymentData {
+		private List<OrderPayment> orderPaymentList;
+
+
+	@Data
 	public class OrderShippingData {
 		private List<OrderDeliveries> orderShippingList;
 
@@ -112,5 +122,6 @@ public class OrderForm {
 					", uploadStatus='" + uploadStatus + '\'' +
 					'}';
 		}
+
 	}
 }

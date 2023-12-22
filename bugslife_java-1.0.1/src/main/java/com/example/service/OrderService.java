@@ -1,5 +1,10 @@
 package com.example.service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -7,17 +12,23 @@ import java.util.Optional;
 
 // import org.hibernate.engine.internal.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.constants.TaxType;
 import com.example.enums.OrderStatus;
 import com.example.enums.PaymentStatus;
 import com.example.form.OrderForm;
+import com.example.form.OrderForm.OrderPaymentData;
 import com.example.model.Order;
 import com.example.model.OrderDeliveries;
 import com.example.model.OrderPayment;
 import com.example.model.OrderProduct;
+import com.example.repository.OrderPaymentRepository;
 import com.example.repository.OrderRepository;
 import com.example.repository.ProductRepository;
 
@@ -31,7 +42,16 @@ public class OrderService {
 	@Autowired
 	private ProductRepository productRepository;
 
+
+	@Autowired
+	private OrderPaymentRepository orderPaymentRepository;
 	
+	private final NamedParameterJdbcTemplate jdbcTemplate;
+
+	public OrderService(NamedParameterJdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+
 
 	public List<Order> findAll() {
 		return orderRepository.findAll();
@@ -157,5 +177,124 @@ public class OrderService {
 		order.setPaymentStatus(paymentStatus);
 		orderRepository.save(order);
 	}
+
+		@Transactional(readOnly = false)
+		public OrderPaymentData getOrderPaymentData(){
+			List<OrderPayment> orderPaymentList = create();
+			OrderForm orderForm = new OrderForm();
+			OrderForm.OrderPaymentData orderPaymentData = orderForm.new OrderPaymentData();
+			orderPaymentData.setOrderPaymentList(orderPaymentList);
+			return orderPaymentData;
+		}
+
+		@Transactional(readOnly = false)
+		public List<OrderPayment> create(){
+			List<OrderPayment> orderPayment = orderPaymentRepository.findAll();
+			List<Order> orders = orderRepository.findAll();
+			for(Order order : orders){
+				if(!containsOrderId(orderPayment, order.getId())){
+					OrderPayment orderpaid = new OrderPayment();
+					orderpaid.setOrderId(order.getId());
+					orderpaid.setPaid(order.getPaid());
+					orderpaid.setMethod(order.getPaymentMethod());
+					orderpaid.setType(order.getPaymentStatus());
+					orderPaymentRepository.save(orderpaid);
+					orderPayment.add(orderpaid);
+				}
+			}
+			return orderPayment;
+		}
+
+		@Transactional(readOnly = false)
+		public boolean containsOrderId(List<OrderPayment> orderPaymentList, Long orderId){
+			for (OrderPayment orderPayment : orderPaymentList) {
+				if (orderPayment.getOrderId().equals(orderId)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+
+		// *CSVインポート処理**
+
+	// @param file
+	// * @throws IOException
+	// */
+	@Transactional(readOnly = false)
+	public void importCSV(MultipartFile file) throws IOException {
+		List<OrderPayment> paymentList = new ArrayList<>();
+		try (BufferedReader br = new BufferedReader(
+				new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+			String line = br.readLine();
+			while ((line = br.readLine()) != null) {
+				final String[] split = line.replace("\"", "").split(",");
+				final OrderPayment orderPayment = new OrderPayment(
+						Long.valueOf(split[0]),
+						Double.valueOf(split[1]),
+						split[2]);
+						
+				paymentList.add(orderPayment);
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("ファイルが読み込めません", e);
+		}
+		batchUpdate(paymentList);
+	}
+
+	@SuppressWarnings("unused")
+	private int[] batchUpdate(List<OrderPayment> orderPayment) {
+		try {
+			String sql = "UPDATE order_payments SET "
+					+ "paid = :paid, "
+					+ "method = :method "
+					+ "WHERE order_id = :order_id";
+
+			SqlParameterSource[] batchArgs = orderPayment.stream()
+					.map((OrderPayment o) -> {
+						MapSqlParameterSource map = new MapSqlParameterSource();
+						map.addValue("order_id", o.getId(), Types.INTEGER);
+						map.addValue("paid", o.getPaid(), Types.DOUBLE);
+						// map.addValue("type", o.getType(), Types.VARCHAR);
+						map.addValue("method", o.getMethod(), Types.VARCHAR);
+						return map;
+					})
+					.toArray(SqlParameterSource[]::new);
+
+			return jdbcTemplate.batchUpdate(sql, batchArgs);
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException("バッチ更新エラー");
+			}
+	}
+
+	public void updateOrderPaymentStatus(Long orderId, String paymentStatus) {
+		Order order = orderRepository.findById(orderId)
+				.orElseThrow(() -> new RuntimeException("Order not found"));
+	
+		order.setPaymentStatus(paymentStatus);
+		orderRepository.save(order);
+	}
+	
+	public void updateOrderPaymentType(Long orderId, String type) {
+		// OrderPaymentエンティティが存在するか確認し、存在する場合は更新
+		System.out.println(orderPaymentRepository.findByOrder_Id(orderId));
+		Optional<OrderPayment> orderPaymentOptional = orderPaymentRepository.findByOrder_Id(orderId);
+		if(orderPaymentOptional.isPresent()){
+			OrderPayment orderPayment = orderPaymentOptional.get();
+			orderPayment.setType(type);
+			orderPaymentRepository.save(orderPayment);
+		}else{
+			System.out.println("orderPayment" + orderPaymentOptional);
+		}
+	}
+
+	public Order getOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+    }
+	
+
+
 
 }

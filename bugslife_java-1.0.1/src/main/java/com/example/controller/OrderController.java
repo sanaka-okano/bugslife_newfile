@@ -29,14 +29,17 @@ import com.example.enums.OrderStatus;
 import com.example.enums.PaymentMethod;
 import com.example.enums.PaymentStatus;
 import com.example.form.OrderForm;
-import com.example.form.OrderForm.OrderShippingData;
+
+import com.example.form.OrderForm
 import com.example.model.Order;
 import com.example.model.OrderDeliveries;
+import com.example.model.OrderPayment;
 import com.example.service.OrderDeliveriesService;
 import com.example.service.OrderService;
 import com.example.service.ProductService;
 
 import jakarta.servlet.http.HttpServletResponse;
+
 
 @Controller
 @RequestMapping("/orders")
@@ -77,6 +80,19 @@ public class OrderController {
 		model.addAttribute("orderForm", orderForm);
 		return "order/shipping";
 	}
+
+
+	@GetMapping(value = "/payment")
+	public String payment(Model model) {
+		OrderPaymentData orderPaymentData = orderService.getOrderPaymentData();
+		List<OrderPayment> orderPaymentList = orderPaymentData.getOrderPaymentList();
+		OrderForm orderForm = new OrderForm();
+		model.addAttribute("orderPaymentList", orderPaymentList);
+		model.addAttribute("orderPaymentData", orderPaymentData);
+		model.addAttribute("orderForm", orderForm);
+		return "order/payment";
+	}
+
 
 
 	@GetMapping(value = "/new")
@@ -210,6 +226,61 @@ public class OrderController {
 		return "redirect:/orders/shipping";
 	}
 
+
+	@PostMapping("payment/upload_file")
+	public String uploadPayment(@RequestParam("file") MultipartFile uploadFile, RedirectAttributes redirectAttributes) {
+
+		if (uploadFile.isEmpty()) {
+			// ファイルが存在しない場合
+			redirectAttributes.addFlashAttribute("error", "ファイルを選択してください。");
+			return "redirect:/orders/payment";
+		}
+		if (!"text/csv".equals(uploadFile.getContentType())) {
+			// CSVファイル以外の場合
+			redirectAttributes.addFlashAttribute("error", "CSVファイルを選択してください。");
+			return "redirect:/orders/payment";
+		}
+		try {
+			orderService.importCSV(uploadFile);
+		} catch (Throwable e) {
+			redirectAttributes.addFlashAttribute("error", e.getMessage());
+			e.printStackTrace();
+			return "redirect:/orders/payment";
+		}
+
+		return "redirect:/orders/payment";
+	}
+
+	@PutMapping("/payment")
+	public String updatePaymentStatus(@ModelAttribute OrderPaymentData orderPaymentData, Model model) {
+        List<OrderPayment> orderPaymentList = orderPaymentData.getOrderPaymentList();
+		
+
+		for (OrderPayment orderPayment : orderPaymentList) {
+			if (orderPayment.getPaid() != 0) {
+				// orderテーブルのpayment_statusを'paid'に更新
+				orderService.updateOrderPaymentStatus(orderPayment.getOrderId(), "paid");
+	
+				// orderテーブルのpayment_statusが'paid'かつstatusが'shipping'の場合
+				Order order = orderService.getOrderById(orderPayment.getOrderId());
+				System.out.println(order);
+				System.out.println(orderPayment.getOrderId());
+				System.out.println("Payment Status: " + order.getPaymentStatus());
+				System.out.println("Order Status: " + order.getStatus());
+				if ("paid".equals(order.getPaymentStatus()) && "shipping".equals(order.getStatus())) {
+					// order_paymentテーブルのtypeを'completed'に更新
+					try {
+						orderService.updateOrderPaymentType(orderPayment.getOrderId(), "completed");
+					} catch (Exception e) {
+						e.printStackTrace();
+						// 例外が発生した場合の処理
+					}
+				}
+			}
+		}
+		return "order/payment";
+	}
+
 	//ダウンロード
 	@PostMapping("/shipping/download")
 	public String download(HttpServletResponse response, RedirectAttributes redirectAttributes) {
@@ -246,5 +317,6 @@ public class OrderController {
 		}
 		return null;
 	}
+
 
 }
