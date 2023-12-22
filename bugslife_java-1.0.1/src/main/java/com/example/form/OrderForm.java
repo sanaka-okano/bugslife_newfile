@@ -1,8 +1,12 @@
 package com.example.form;
 
-import java.util.List;
 import java.sql.Timestamp;
+import java.util.List;
+import java.util.Set;
 
+import com.example.model.OrderDeliveries;
+
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -90,5 +94,23 @@ public class OrderForm {
 		private Timestamp paidAt;
 
 		private String method;
+	}
+
+	@Data
+	public class OrderShippingData {
+		private List<OrderDeliveries> orderShippingList;
+
+		private Set<Long> checkedItems;
+
+		private String uploadStatus;
+
+		@Override
+		public String toString() {
+			return "OrderShippingData{" +
+					"orderShippingList=" + orderShippingList +
+					", checkedItems=" + checkedItems +
+					", uploadStatus='" + uploadStatus + '\'' +
+					'}';
+		}
 	}
 }
