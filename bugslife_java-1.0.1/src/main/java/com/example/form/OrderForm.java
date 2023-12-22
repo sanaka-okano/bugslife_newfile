@@ -1,8 +1,11 @@
 package com.example.form;
 
-import java.util.List;
 import java.sql.Timestamp;
+import java.util.List;
 
+import com.example.model.OrderPayment;
+
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -90,5 +93,9 @@ public class OrderForm {
 		private Timestamp paidAt;
 
 		private String method;
+	}
+	@Data
+	public class OrderPaymentData {
+		private List<OrderPayment> orderPaymentList;
 	}
 }
