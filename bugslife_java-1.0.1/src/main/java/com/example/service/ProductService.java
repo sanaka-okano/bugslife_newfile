@@ -170,7 +170,6 @@ public class ProductService {
 			query.where(builder.lessThanOrEqualTo(root.get("price"), form.getPrice2()));
 		}
 		TypedQuery<ProductWithCategoryName> typedQuery = entityManager.createQuery(query);
-		System.out.println("-----------------" + typedQuery.getResultList());
 		return typedQuery.getResultList();
 
 	}

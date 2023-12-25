@@ -3,7 +3,13 @@ package com.example.form;
 import java.sql.Timestamp;
 import java.util.List;
 
+
 import com.example.model.OrderPayment;
+
+import java.util.Set;
+
+import com.example.model.OrderDeliveries;
+
 
 import lombok.Data;
 import lombok.Getter;
@@ -94,8 +100,28 @@ public class OrderForm {
 
 		private String method;
 	}
+
 	@Data
 	public class OrderPaymentData {
 		private List<OrderPayment> orderPaymentList;
+
+
+	@Data
+	public class OrderShippingData {
+		private List<OrderDeliveries> orderShippingList;
+
+		private Set<Long> checkedItems;
+
+		private String uploadStatus;
+
+		@Override
+		public String toString() {
+			return "OrderShippingData{" +
+					"orderShippingList=" + orderShippingList +
+					", checkedItems=" + checkedItems +
+					", uploadStatus='" + uploadStatus + '\'' +
+					'}';
+		}
+
 	}
 }

@@ -1,5 +1,8 @@
 package com.example.controller;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,18 +23,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.OrderDeliveriesDto;
 import com.example.constants.Message;
 import com.example.enums.OrderStatus;
 import com.example.enums.PaymentMethod;
 import com.example.enums.PaymentStatus;
 import com.example.form.OrderForm;
-import com.example.form.OrderForm.OrderPaymentData;
+
+import com.example.form.OrderForm
 import com.example.model.Order;
 import com.example.model.OrderDeliveries;
 import com.example.model.OrderPayment;
 import com.example.service.OrderDeliveriesService;
 import com.example.service.OrderService;
 import com.example.service.ProductService;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 
 @Controller
@@ -65,10 +72,12 @@ public class OrderController {
 
 	@GetMapping(value = "/shipping")
 	public String shipping(Model model) {
-		List<OrderDeliveries> orderShippingData = orderDeliveriesService.findAll();
-		List<OrderDeliveries> orderDeliveriesList = orderDeliveriesService.addOrderDeliveriesForOrderedOrders();
-		model.addAttribute("orderShippingList", orderDeliveriesList);
+		OrderShippingData orderShippingData = orderDeliveriesService.getOrderShippingData();
+		List<OrderDeliveries> orderShippingList = orderShippingData.getOrderShippingList();
+		OrderForm orderForm = new OrderForm();
+		model.addAttribute("orderShippingList", orderShippingList);
 		model.addAttribute("orderShippingData", orderShippingData);
+		model.addAttribute("orderForm", orderForm);
 		return "order/shipping";
 	}
 
@@ -169,29 +178,54 @@ public class OrderController {
 		}
 	}
 
-	@PostMapping("/upload_file")
+
+	// shipping checkbox更新
+	@PutMapping("/shipping")
+    public String updateChecked(@ModelAttribute OrderShippingData orderShippingData, Model model) {
+        List<OrderDeliveries> orderShippingList = orderShippingData.getOrderShippingList();
+
+        for (OrderDeliveries orderShipping : orderShippingList) {
+            if (orderShipping.isChecked()) {
+                try {
+                    // チェックされた行のデータを更新
+                    orderDeliveriesService.updateShippingList(orderShipping);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+		 // 更新後のデータを再取得して表示
+		orderShippingData = orderDeliveriesService.getOrderShippingData();
+		model.addAttribute("orderShippingList", orderShippingData.getOrderShippingList());
+		model.addAttribute("orderShippingData", orderShippingData);
+		model.addAttribute("orderForm", new OrderForm());
+		return "order/shipping";
+    }
+
+	@PostMapping("/shipping/upload_file")
 	public String uploadFile(@RequestParam("file") MultipartFile uploadFile, RedirectAttributes redirectAttributes) {
 
 		if (uploadFile.isEmpty()) {
 			// ファイルが存在しない場合
 			redirectAttributes.addFlashAttribute("error", "ファイルを選択してください。");
-			return "redirect:/order/shipping";
+			return "redirect:/orders/shipping";
 		}
 		if (!"text/csv".equals(uploadFile.getContentType())) {
 			// CSVファイル以外の場合
 			redirectAttributes.addFlashAttribute("error", "CSVファイルを選択してください。");
-			return "redirect:/order/shipping";
+			return "redirect:/orders/shipping";
 		}
 		try {
 			orderDeliveriesService.importCSV(uploadFile);
 		} catch (Throwable e) {
 			redirectAttributes.addFlashAttribute("error", e.getMessage());
 			e.printStackTrace();
-			return "redirect:/order/shipping";
+			return "redirect:/orders/shipping";
 		}
 
-		return "redirect:/order/shipping";
+		return "redirect:/orders/shipping";
 	}
+
 
 	@PostMapping("payment/upload_file")
 	public String uploadPayment(@RequestParam("file") MultipartFile uploadFile, RedirectAttributes redirectAttributes) {
@@ -246,4 +280,43 @@ public class OrderController {
 		}
 		return "redirect:/orders/payment";
 	}
+
+	//ダウンロード
+	@PostMapping("/shipping/download")
+	public String download(HttpServletResponse response, RedirectAttributes redirectAttributes) {
+
+		try(OutputStream os = response.getOutputStream()){
+			List<OrderDeliveriesDto> dataList = orderDeliveriesService.getNotShippedOrders();
+			StringBuilder csvContent = new StringBuilder();
+        
+        // ヘッダー行
+        csvContent.append("Order ID,Shipping Code,Shipping Date,DeliveryDate,DeliveryTimezome\n" + //
+        "");
+        
+        // データ行
+        for (OrderDeliveriesDto order : dataList) {
+            csvContent.append(order.getId())
+						.append(",")
+						.append(order.getShippingCode())
+						.append(",")
+						.append(order.getShippingDate())
+						.append(",")
+						.append(order.getDeliveryDate())
+						.append(",")
+						.append(order.getDeliveryTimezome())
+						.append("\n");
+        }
+
+			String attachment = "attachment; filename=shipping_" + new Date().getTime() + ".csv";
+			response.setContentType("application/octet-stream");
+			response.setHeader("Content-Disposition", attachment);
+			os.write(csvContent.toString().getBytes());
+			os.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+
 }
