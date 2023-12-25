@@ -266,6 +266,7 @@ public class OrderService {
 			}
 	}
 
+	@Transactional(readOnly = false)
 	public void updateOrderPaymentStatus(Long orderId, String paymentStatus) {
 		Order order = orderRepository.findById(orderId)
 				.orElseThrow(() -> new RuntimeException("Order not found"));
@@ -273,10 +274,9 @@ public class OrderService {
 		order.setPaymentStatus(paymentStatus);
 		orderRepository.save(order);
 	}
-	
+	@Transactional(readOnly = false)
 	public void updateOrderPaymentType(Long orderId, String type) {
 		// OrderPaymentエンティティが存在するか確認し、存在する場合は更新
-		System.out.println(orderPaymentRepository.findByOrder_Id(orderId));
 		Optional<OrderPayment> orderPaymentOptional = orderPaymentRepository.findByOrder_Id(orderId);
 		if(orderPaymentOptional.isPresent()){
 			OrderPayment orderPayment = orderPaymentOptional.get();
@@ -286,7 +286,7 @@ public class OrderService {
 			System.out.println("orderPayment" + orderPaymentOptional);
 		}
 	}
-
+	@Transactional(readOnly = false)
 	public Order getOrderById(Long orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));

@@ -27,7 +27,7 @@
   <div th:if="${orderPaymentData}">
     <!-- チェックを入れたデータのみ出荷済みに更新する -->
     <form th:action="@{/orders/payment}" th:method="'put'" th:object="${orderPaymentData}">
-      <button type="submit" class="btn btn-success">出荷情報更新</button>
+      <button type="submit" class="btn btn-success">入金情報更新</button>
       <table class="table">
         <thead>
           <tr>
