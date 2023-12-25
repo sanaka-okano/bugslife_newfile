@@ -267,7 +267,7 @@ public class OrderController {
 				System.out.println(orderPayment.getOrderId());
 				System.out.println("Payment Status: " + order.getPaymentStatus());
 				System.out.println("Order Status: " + order.getStatus());
-				if ("paid".equals(order.getPaymentStatus()) && "shipping".equals(order.getStatus())) {
+				if ("paid".equals(order.getPaymentStatus()) && "shipped".equals(order.getStatus())) {
 					// order_paymentテーブルのtypeを'completed'に更新
 					try {
 						orderService.updateOrderPaymentType(orderPayment.getOrderId(), "completed");
@@ -278,7 +278,7 @@ public class OrderController {
 				}
 			}
 		}
-		return "order/payment";
+		return "redirect:/orders/payment";
 	}
 
 	//ダウンロード
