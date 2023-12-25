@@ -29,8 +29,8 @@ import com.example.enums.OrderStatus;
 import com.example.enums.PaymentMethod;
 import com.example.enums.PaymentStatus;
 import com.example.form.OrderForm;
-
-import com.example.form.OrderForm
+import com.example.form.OrderForm.OrderPaymentData;
+import com.example.form.OrderForm.OrderShippingData;
 import com.example.model.Order;
 import com.example.model.OrderDeliveries;
 import com.example.model.OrderPayment;
@@ -56,7 +56,8 @@ public class OrderController {
 
 	@GetMapping
 	public String index(Model model) {
-		List<Order> all = orderService.findAll();
+		List<Order> all = orderService.findOrdersList();
+		System.out.println("ORDERSLIST----" + all);
 		model.addAttribute("listOrder", all);
 		return "order/index";
 	}

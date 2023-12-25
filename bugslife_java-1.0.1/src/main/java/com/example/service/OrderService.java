@@ -32,9 +32,15 @@ import com.example.repository.OrderPaymentRepository;
 import com.example.repository.OrderRepository;
 import com.example.repository.ProductRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
 @Service
 @Transactional(readOnly = true)
 public class OrderService {
+
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	@Autowired
 	private OrderRepository orderRepository;
@@ -55,6 +61,10 @@ public class OrderService {
 
 	public List<Order> findAll() {
 		return orderRepository.findAll();
+	}
+
+	public List<Order> findOrdersList(){
+		return orderRepository.findOrdersList();
 	}
 
 	public Optional<Order> findOne(Long id) {
