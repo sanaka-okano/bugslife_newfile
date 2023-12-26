@@ -51,4 +51,8 @@ public class FileImportInfo extends TimeEntity implements Serializable {
 	// 取込元のサービス
 	@Column(name = "type", nullable = false, columnDefinition = "TINYINT(1)")
 	private ServiceType type;
+
+	public FileImportStatus getStatus() {
+		return this.status;
+	}
 }

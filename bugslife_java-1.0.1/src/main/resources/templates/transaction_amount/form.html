@@ -39,10 +39,10 @@
       <label for="memo">メモ</label>
       <textarea id="memo" name="memo" class="form-control" th:field="*{memo}"></textarea>
     </div>
-
     <button type="submit" class="btn btn-success">保存</button>
     <a th:href="@{/companies/{c_id}(c_id = ${tAmount.company.id})}" class="btn btn-default">戻る</a>
   </form>
+</script>
 </th:block>
 
 </html>
