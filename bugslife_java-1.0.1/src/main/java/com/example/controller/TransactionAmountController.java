@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +29,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.constants.Message;
+import com.example.enums.FileImportStatus;
 import com.example.model.Company;
+import com.example.model.FileImportInfo;
 import com.example.model.TransactionAmount;
+import com.example.repository.FileImportInfoRepository;
 import com.example.service.CompanyService;
 import com.example.service.TransactionAmountService;
 
@@ -41,6 +47,9 @@ public class TransactionAmountController {
 	private TransactionAmountService transactionAmountService;
 	@Autowired
 	private CompanyService companyService;
+
+	@Autowired
+	private FileImportInfoRepository fileImportInfoRepository;
 
 	/**
 	 * 取引金額情報の詳細画面表示
@@ -183,6 +192,14 @@ public class TransactionAmountController {
 		return "redirect:/companies";
 	}
 
+
+	// @GetMapping("/{c_id}/upload_csv")
+	// public ResponseEntity<Map<String, String>> uploadStatus(@PathVariable("c_id") Long companyId, RedirectAttributes redirectAttributes){
+	// 	redirectAttributes.addFlashAttribute("error", "取込中");
+	// 	Map<String, String> response = new HashMap<>();
+    //     response.put("status", "COMPLETE"); // または "ERROR"
+	// 	return ResponseEntity.ok(response);
+	// }
 	/**
 	 * 取引金額CSVインポート処理
 	 *
@@ -208,10 +225,37 @@ public class TransactionAmountController {
 
 		// csvファイルのインポート処理
 		try {
-			transactionAmountService.importCSV(csvFile, companyId);
+			// CompletableFuture のリストを作成
+    List<CompletableFuture<FileImportInfo>> importResults = new ArrayList<>();
+
+    // 非同期処理を開始し、リストに追加
+    importResults.add(transactionAmountService.importCSV(csvFile, companyId));
+			// すべての非同期処理が完了するまで待機
+    CompletableFuture<Void> allOf = CompletableFuture.allOf(
+            importResults.toArray(new CompletableFuture[importResults.size()])
+    );
+
+    // すべての非同期処理が完了した後の処理
+    allOf.thenRun(() -> {
+        for (CompletableFuture<FileImportInfo> importResult : importResults) {
+            try {
+                FileImportInfo updatedImp = importResult.join();
+                if (updatedImp.getStatus() == FileImportStatus.COMPLETE) {
+                    redirectAttributes.addFlashAttribute("success", updatedImp.getStatus().getValue());
+                } else if (updatedImp.getStatus() == FileImportStatus.ERROR){
+                    redirectAttributes.addFlashAttribute("error", updatedImp.getStatus().getValue());
+                } else{
+					redirectAttributes.addFlashAttribute("error", updatedImp.getStatus().getValue());
+				}
+            } catch (Throwable t) {
+                // エラーハンドリング
+                t.printStackTrace();
+            }
+        }
+    }).join(); // この行を追加
 		} catch (Throwable t) {
-			redirectAttributes.addFlashAttribute("error", t.getMessage());
 			t.printStackTrace();
+			redirectAttributes.addFlashAttribute("error", "エラーが発生しました");
 			return redirectUrl;
 		}
 

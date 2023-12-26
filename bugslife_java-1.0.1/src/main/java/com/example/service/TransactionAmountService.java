@@ -8,9 +8,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -149,11 +151,11 @@ public class TransactionAmountService {
 	 * @todo 非同期化
 	 */
 	@Transactional
-	public void importCSV(MultipartFile file, Long companyId) throws Exception {
+	@Async
+	public CompletableFuture<FileImportInfo> importCSV(MultipartFile file, Long companyId) throws Exception {
 		// アップデート後のインスタンス
 		FileImportInfo updatedImp;
 		SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd");
-
 		// CSV取込親テーブルに取込中でデータを登録する
 		try {
 			// CSV取込親テーブルのインスタンスを生成
@@ -203,12 +205,14 @@ public class TransactionAmountService {
 				transactionAmountRepository.save(transactionAmount);
 			}
 			updatedImp.setStatus(FileImportStatus.COMPLETE);
+			return CompletableFuture.completedFuture(updatedImp);
 		} catch (Exception e) {
 			// 失敗の場合、ステータスをエラーにする
 			updatedImp.setStatus(FileImportStatus.ERROR);
 			// エラーはコントローラーで処理
 			e.printStackTrace();
-			throw e;
+			// throw e;
+			return CompletableFuture.completedFuture(updatedImp);
 		} finally {
 			// 取込完了日時をセットして処理終了
 			updatedImp.setEndDatetime(LocalDateTime.now());
