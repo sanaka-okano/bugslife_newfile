@@ -25,6 +25,8 @@ public class WebSecurityConfig {
 				.authorizeHttpRequests((requests) -> requests
 						.requestMatchers("/", "/css/**", "js/**", "/image/**").permitAll()
 						.requestMatchers("/*.ico").permitAll()
+						.requestMatchers("/transactionAmounts/{id}").hasRole("USER")
+						.requestMatchers("/transactionAmounts/**").hasRole("ADMIN")
 						.anyRequest().authenticated())
 				.formLogin((form) -> form
 						.loginPage("/auth/login")
@@ -60,7 +62,7 @@ public class WebSecurityConfig {
 				.password("{noop}password")
 				.roles("USER", "ADMIN")
 				.build();
-
+				
 		return new CustomInMemoryUserDetailsManager(user, admin);
 	}
 }
