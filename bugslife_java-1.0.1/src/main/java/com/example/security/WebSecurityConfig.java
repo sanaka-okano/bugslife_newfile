@@ -1,5 +1,6 @@
 package com.example.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,6 +18,10 @@ import org.springframework.security.web.util.matcher.OrRequestMatcher;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
+
+	@Autowired
+    private CustomLogoutSuccessHandler customLogoutSuccessHandler;
+
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -36,7 +41,7 @@ public class WebSecurityConfig {
 						.permitAll())
 				.logout((logout) -> {
 					logout
-							.logoutSuccessUrl("/auth/login?logout");
+							.logoutSuccessHandler(customLogoutSuccessHandler);
 					String logoutUrl = "/auth/logout";
 					logout.logoutRequestMatcher(
 							new OrRequestMatcher(
