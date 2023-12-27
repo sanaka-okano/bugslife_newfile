@@ -19,6 +19,7 @@ import com.example.repository.UserRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 @Service
 @Transactional(readOnly = true)
@@ -81,12 +82,13 @@ public class UserService {
 	public List<User> search(UserSearchForm form, boolean isAdmin) {
 		String role = isAdmin ? "ADMIN" : "USER";
 		if (form.getName() != null && form.getName() != "") {
-			String sql = "SELECT * FROM users WHERE name = '" + form.getName() + "'";
+			String sql = "SELECT * FROM users WHERE name = ?";
 			if (!isAdmin) {
 				sql += " AND role = '" + role + "'";
 			}
-			return entityManager.createNativeQuery(sql, User.class)
-					.getResultList();
+			Query query = entityManager.createNativeQuery(sql, User.class);
+			query.setParameter(1, form.getName());
+			return query.getResultList();
 		}
 		if (!isAdmin) {
 			return userRepository.findByRole(role);
