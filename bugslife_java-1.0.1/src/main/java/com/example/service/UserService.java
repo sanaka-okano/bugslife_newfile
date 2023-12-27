@@ -1,21 +1,24 @@
 package com.example.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.form.UserSearchForm;
 import com.example.model.DeletedUser;
 import com.example.model.User;
 import com.example.repository.DeletedUserRepository;
 import com.example.repository.UserRepository;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 @Service
 @Transactional(readOnly = true)
@@ -29,6 +32,9 @@ public class UserService {
 
 	@Autowired
 	private DeletedUserRepository deletedUserRepository;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	public List<User> findAll() {
 		return userRepository.findAll();
@@ -46,8 +52,9 @@ public class UserService {
 		/**
 		 * パスワードをjavaの暗号化方式を付与する
 		 */
-		entity.setPassword("{noop}" + entity.getPassword());
-		return userRepository.save(entity);
+		String hashedPassword = passwordEncoder.encode(entity.getPassword());
+        entity.setPassword(hashedPassword);
+        return userRepository.save(entity);
 	}
 
 	@Transactional(readOnly = false)

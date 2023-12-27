@@ -7,6 +7,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -64,5 +66,10 @@ public class WebSecurityConfig {
 				.build();
 				
 		return new CustomInMemoryUserDetailsManager(user, admin);
+	}
+
+	@Bean
+	PasswordEncoder passwordEncoder(){
+		return PasswordEncoderFactories.createDelegatingPasswordEncoder();
 	}
 }
