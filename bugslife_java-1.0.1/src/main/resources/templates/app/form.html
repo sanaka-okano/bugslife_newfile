@@ -53,12 +53,17 @@
         const reader = new FileReader();
         reader.addEventListener('load', function () {
           image.value = reader.result;
+          const existingImagePreview = document.getElementById('image_preview');
+                if (existingImagePreview) {
+                    existingImagePreview.src = reader.result;
+                } else {
           const imagePreview = document.createElement('img');
           imagePreview.id = 'image_preview';
           imagePreview.src = reader.result;
           imagePreview.style = "max-width: 200px; max-height: 200px;";
 
           imageFile.after(imagePreview);
+                }
         });
         reader.readAsDataURL(file);
       });
